@@ -65,45 +65,57 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: black,
-      appBar: AppBar(backgroundColor: black, toolbarHeight: 20,),
+      appBar: AppBar(backgroundColor: black),
       body: EquationProvider(
         equation: _equation,
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: TextField(
-                controller: _equation,
-                cursorWidth: 2,
-                cursorHeight: 40,
-                readOnly: true,
-                showCursor: true,
-                cursorColor: Colors.black,
-                focusNode: myFocusNode,
-                style: TextStyle(
-                  color: white,
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
+            Expanded(
+              flex: 1,
+              child: Padding(
+                padding: const EdgeInsets.all(15),
+                child: TextField(
+                  controller: _equation,
+                  cursorWidth: 2,
+                  cursorHeight: 40,
+                  readOnly: true,
+                  showCursor: true,
+                  cursorColor: Colors.black,
+                  focusNode: myFocusNode,
+                  style: TextStyle(
+                    color: white,
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  decoration: InputDecoration(border: InputBorder.none),
                 ),
-                decoration: InputDecoration(border: InputBorder.none),
               ),
             ),
-            Container(
+            Expanded(
+              flex: 1,
+              child: Container(
                 alignment: Alignment.centerRight,
                 color: black,
-                height: 60,
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Text(
-                    "${output == null ? '' : output == output!.toInt() ? output!.toInt() : output}  ",
-                    style: TextStyle(color: green, fontSize: 27, fontWeight: FontWeight.bold),
+                    "${output == null
+                        ? ''
+                        : output == output!.toInt()
+                        ? output!.toInt()
+                        : output}  ",
+                    style: TextStyle(
+                      color: green,
+                      fontSize: 27,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
+            ),
             Row(
               children: [
                 Expanded(
-                  flex: 1,
                   child: Padding(
                     padding: const EdgeInsets.all(5),
                     child: Button(
@@ -117,19 +129,15 @@ class _HomeState extends State<Home> {
                   ),
                 ),
                 Expanded(
-                  flex: 1,
                   child: Button(
                     char: '',
-                    icon: Icon(
-                      Icons.backspace_sharp,
-                      color: white,
-                      size: 25,
-                    ),
+                    icon: Icon(Icons.backspace_sharp, color: white, size: 25),
                   ),
                 ),
               ],
             ),
             Expanded(
+              flex: 3,
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   int crossAxisCount = 4;
@@ -143,7 +151,7 @@ class _HomeState extends State<Home> {
                       (constraints.maxWidth - (crossAxisCount - 1) * spacing) /
                       crossAxisCount;
                   return Padding(
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(15),
                     child: GridView.builder(
                       physics: NeverScrollableScrollPhysics(),
                       itemCount: buttons.length,

@@ -28,6 +28,7 @@ class Button extends StatelessWidget {
           () => icon == null
               ? insertEquation(context, char)
               : deleteAtCursor(context),
+      onLongPress: () => icon != null ? controller(context).text = '' : null,
       child:
           icon ??
           Text(

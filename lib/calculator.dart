@@ -14,6 +14,8 @@ class Calculator {
     final Iterable<RegExpMatch> matches = regex.allMatches(_input);
     final List<String> rawTokens = matches.map((e) => e.group(0)!).toList();
 
+    if (rawTokens.isEmpty) return;
+
     for (int i = 0; i < rawTokens.length; i++) {
       final current = rawTokens[i];
 
@@ -37,7 +39,7 @@ class Calculator {
           continue;
         }
 
-        // assign negative sign to doubleber
+        // assign negative sign to number
         if (i == 0 || "+-*/^(".contains(rawTokens[i - 1])) {
           final combined = '$current${rawTokens[i + 1]}';
           _items.add(double.tryParse(combined) ?? combined);
@@ -47,17 +49,6 @@ class Calculator {
       }
 
       _items.add(double.tryParse(current) ?? current);
-    }
-
-    // remove empty brackets ()
-    int i = 0;
-    while (i < _items.length - 1) {
-      if (_items[i] == '(' && _items[i + 1] == ')') {
-        _items.removeAt(i);
-        _items.removeAt(i);
-        continue;
-      }
-      i++;
     }
 
     // handle for multiplication () without '*'
@@ -96,21 +87,20 @@ class Calculator {
       }
     }
 
-    if (_items.where((e) => e == '(').length !=
-        _items.where((e) => e == ')').length) {
-      snackBar(context, "Mismatched brackets");
+    if (_items.length == 1 && "+-*/^√".contains(_items[0])) {
+      snackBar(context, "Expression cannot contains operations only");
       return false;
     }
 
     // handle operations in last of equation
-    if (_items.isNotEmpty && "+-*/^".contains(_items.last.toString())) {
-      snackBar(context, "Expression cannot end with an operator");
-      return false;
-    }
-
-    // handle operations in last of equation
-    if (_items.isNotEmpty && "+-*/^".contains(_items.first.toString())) {
+    if (_items.isNotEmpty && "+-*/^√".contains(_items.first.toString())) {
       snackBar(context, "Expression cannot start with an operator");
+      return false;
+    }
+
+    // handle operations in last of equation
+    if (_items.isNotEmpty && "+-*/^√".contains(_items.last.toString())) {
+      snackBar(context, "Expression cannot end with an operator");
       return false;
     }
 
@@ -161,11 +151,16 @@ class Calculator {
           if (pos >= 0) {
             final operation = precedence[items[pos]]!;
 
-            if (operation == _calculate) {
-              items.replaceRange(pos, pairs[pos]! + 1, [
-                _calculate(items.sublist(pos + 1, pairs[pos]!)),
-              ]);
-              continue;
+            try {
+              if (operation == _calculate) {
+                items.replaceRange(pos, pairs[pos]! + 1, [
+                  _calculate(items.sublist(pos + 1, pairs[pos]!)),
+                ]);
+                continue;
+              }
+            } catch (e) {
+              snackBar(context, "mis matched brackets");
+              return null;
             }
 
             if (operation == _root) {
@@ -187,13 +182,19 @@ class Calculator {
               items.removeAt(pos - 1);
               items.removeAt(pos - 1);
             } catch (e) {
-              snackBar(context, 'Devision by 0 is Impossible');
+              snackBar(
+                context,
+                operation == _division
+                    ? 'Devision by 0 is Impossible'
+                    : "Error found",
+              );
               return null;
             }
           }
         } while (pos >= 0);
       }
     }
+
     return items[0];
   }
 
