@@ -19,7 +19,7 @@ class _ButtonState extends State<Button> {
 
   @override
   Widget build(BuildContext context) {
-    final equation = getEquationController(context);
+    final equation = _getEquationController(context);
 
     return GestureDetector(
       onLongPressStart: widget.icon != null
@@ -59,8 +59,8 @@ class _ButtonState extends State<Button> {
         onPressed:
             widget.onPress ??
             () => widget.icon == null
-                ? insertEquation(equation, widget.char)
-                : deleteAtCursor(equation),
+                ? _insertEquation(equation, widget.char)
+                : _deleteAtCursor(equation),
         child:
             widget.icon ??
             Text(
@@ -77,10 +77,10 @@ class _ButtonState extends State<Button> {
     );
   }
 
-  TextEditingController getEquationController(BuildContext context) =>
+  TextEditingController _getEquationController(BuildContext context) =>
       EquationProvider.of(context)?.equation ?? TextEditingController();
 
-  void insertEquation(TextEditingController equation, String char) {
+  void _insertEquation(TextEditingController equation, String char) {
     final selection = equation.selection;
     final int start = selection.start;
     final int end = selection.end;
@@ -96,7 +96,7 @@ class _ButtonState extends State<Button> {
     equation.selection = TextSelection.collapsed(offset: start + char.length);
   }
 
-  void deleteAtCursor(TextEditingController equation) {
+  void _deleteAtCursor(TextEditingController equation) {
     final text = equation.text;
     final selection = equation.selection;
     final int start = selection.start;
@@ -119,7 +119,7 @@ class _ButtonState extends State<Button> {
     while (_isDeleting && equation.text.isNotEmpty) {
       await Future.delayed(Duration(milliseconds: 80));
       if (!_isDeleting) break;
-      deleteAtCursor(equation);
+      _deleteAtCursor(equation);
     }
   }
 
@@ -127,7 +127,7 @@ class _ButtonState extends State<Button> {
     while (_isInserting) {
       await Future.delayed(Duration(milliseconds: 80));
       if (!_isInserting) break;
-      insertEquation(equation, widget.char);
+      _insertEquation(equation, widget.char);
     }
   }
 }
