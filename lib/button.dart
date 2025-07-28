@@ -1,4 +1,4 @@
-import 'package:calculator/common_code.dart';
+import 'package:calculator/common_colors.dart';
 import 'package:calculator/equation_provider.dart';
 import 'package:flutter/material.dart';
 
@@ -15,12 +15,12 @@ class Button extends StatelessWidget {
       style: ButtonStyle(
         backgroundColor: WidgetStatePropertyAll(
           double.tryParse(char) != null
-              ? blue
+              ? BLUE
               : char == 'C'
               ? Colors.red
               : (icon != null || char == '=' || char == '.')
-              ? black
-              : green,
+              ? BLACK
+              : GREEN,
         ),
       ),
       onPressed:
@@ -28,28 +28,26 @@ class Button extends StatelessWidget {
           () => icon == null
               ? insertEquation(context, char)
               : deleteAtCursor(context),
-      onLongPress: () => icon != null ? controller(context).text = '' : null,
+      onLongPress: () =>
+          icon != null ? getEquationController(context).text = '' : null,
       child:
           icon ??
           Text(
             char,
             style: TextStyle(
               fontSize: 30,
-              color: (char == '=' || char == '.') ? green : white,
+              color: (char == '=' || char == '.') ? GREEN : WHITE,
               fontWeight: FontWeight.w900,
             ),
           ),
     );
   }
 
-  TextEditingController controller(BuildContext context) {
-    final provider = EquationProvider.of(context);
-
-    return provider?.equation ?? TextEditingController();
-  }
+  TextEditingController getEquationController(BuildContext context) =>
+      EquationProvider.of(context)?.equation ?? TextEditingController();
 
   void insertEquation(BuildContext context, String char) {
-    final TextEditingController equation = controller(context);
+    final TextEditingController equation = getEquationController(context);
 
     final selection = equation.selection;
     final int start = selection.start;
@@ -67,7 +65,7 @@ class Button extends StatelessWidget {
   }
 
   void deleteAtCursor(BuildContext context) {
-    final TextEditingController equation = controller(context);
+    final TextEditingController equation = getEquationController(context);
 
     final text = equation.text;
     final selection = equation.selection;

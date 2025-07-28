@@ -6,7 +6,7 @@ class EquationProvider extends InheritedWidget {
   const EquationProvider({
     super.key,
     required super.child,
-    required this.equation
+    required this.equation,
   });
 
   static EquationProvider? of(BuildContext context) {

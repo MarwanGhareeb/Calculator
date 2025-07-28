@@ -8,7 +8,7 @@ class Calculator {
 
   Calculator(this._input, this.context);
 
-  void splitEquation() {
+  void tokenizeEquation() {
     final RegExp regex = RegExp(r'((\d+)?\.\d+|\d+|[\+\-\*/√^()])');
 
     final Iterable<RegExpMatch> matches = regex.allMatches(_input);
@@ -51,13 +51,14 @@ class Calculator {
       _items.add(double.tryParse(current) ?? current);
     }
 
-    // handle for multiplication () without '*'
+    // validateTokens for multiplication () without '*'
     for (int i = 1; i < _items.length; i++) {
       if (((_items[i] == '√' || _items[i] == '(') &&
               _items[i - 1].runtimeType != String) ||
-          (_items[i - 1] == ')' && _items[i].runtimeType != String)) {
+          (_items[i - 1] == ')' && _items[i].runtimeType != String) ||
+          (_items[i - 1] == ')' && _items[i] == '√')) {
         _items.insert(i, '*');
-        i++;
+        // i++;
       }
 
       if ((_items[i - 1] == ')' && _items[i] == '(')) {
@@ -77,31 +78,27 @@ class Calculator {
     }
   }
 
-  bool handle() {
-    // handle operation side operation
+  bool validateTokens() {
+    // validateTokens operation side operation
     for (int i = 0; i < _items.length - 1; i++) {
       if ("+-*/".contains(_items[i].toString()) &&
           "+-*/".contains(_items[i + 1].toString())) {
-        snackBar(context, "One Operation Between Two doublebers");
-        return false;
+        throw Exception("One Operation Between Two doublebers");
       }
     }
 
-    if (_items.length == 1 && "+-*/^√".contains(_items[0])) {
-      snackBar(context, "Expression cannot contains operations only");
-      return false;
+    if (_items.length == 1 && "+-*/^√".contains(_items[0].toString())) {
+      throw Exception("Expression cannot contains operations only");
     }
 
-    // handle operations in last of equation
-    if (_items.isNotEmpty && "+-*/^√".contains(_items.first.toString())) {
-      snackBar(context, "Expression cannot start with an operator");
-      return false;
+    // validateTokens operations in last of equation
+    if (_items.isNotEmpty && "+-*/^".contains(_items.first.toString())) {
+      throw Exception("Expression cannot start with an operator");
     }
 
-    // handle operations in last of equation
+    // validateTokens operations in last of equation
     if (_items.isNotEmpty && "+-*/^√".contains(_items.last.toString())) {
-      snackBar(context, "Expression cannot end with an operator");
-      return false;
+      throw Exception("Expression cannot end with an operator");
     }
 
     return true;
@@ -142,57 +139,56 @@ class Calculator {
       return pairs;
     }
 
-    while (items.length > 1) {
-      for (var precedence in operators) {
-        int pos = 0;
-        do {
-          Map<int, int> pairs = rounds(items);
-          pos = items.indexWhere((e) => precedence.containsKey(e));
-          if (pos >= 0) {
-            final operation = precedence[items[pos]]!;
+    try {
+      while (items.length > 1) {
+        for (var precedence in operators) {
+          int pos = 0;
+          do {
+            Map<int, int> pairs = rounds(items);
+            pos = items.indexWhere((e) => precedence.containsKey(e));
+            if (pos >= 0) {
+              final operation = precedence[items[pos]]!;
 
-            try {
-              if (operation == _calculate) {
-                items.replaceRange(pos, pairs[pos]! + 1, [
-                  _calculate(items.sublist(pos + 1, pairs[pos]!)),
-                ]);
-                continue;
-              }
-            } catch (e) {
-              snackBar(context, "mis matched brackets");
-              return null;
-            }
-
-            if (operation == _root) {
               try {
-                items[pos + 1] = operation(items[pos + 1]);
-                items.removeAt(pos);
-                continue;
+                if (operation == _calculate) {
+                  items.replaceRange(pos, pairs[pos]! + 1, [
+                    _calculate(items.sublist(pos + 1, pairs[pos]!)),
+                  ]);
+                  continue;
+                }
               } catch (e) {
-                snackBar(
-                  context,
-                  'A negative sign cannot be inside a square root',
+                throw Exception("mis matched brackets");
+              }
+
+              if (operation == _root) {
+                try {
+                  items[pos + 1] = operation(items[pos + 1]);
+                  items.removeAt(pos);
+                  continue;
+                } catch (e) {
+                  throw Exception(
+                    'A negative sign cannot be inside a square root',
+                  );
+                }
+              }
+
+              try {
+                items[pos + 1] = operation(items[pos - 1], items[pos + 1]);
+                items.removeAt(pos - 1);
+                items.removeAt(pos - 1);
+              } catch (e) {
+                throw Exception(
+                  operation == _division
+                      ? 'Devision by 0 is Impossible'
+                      : "Error found",
                 );
-                return null;
               }
             }
-
-            try {
-              items[pos + 1] = operation(items[pos - 1], items[pos + 1]);
-              items.removeAt(pos - 1);
-              items.removeAt(pos - 1);
-            } catch (e) {
-              snackBar(
-                context,
-                operation == _division
-                    ? 'Devision by 0 is Impossible'
-                    : "Error found",
-              );
-              return null;
-            }
-          }
-        } while (pos >= 0);
+          } while (pos >= 0);
+        }
       }
+    } catch (e) {
+      throw Exception("Invalid input or calculation error");
     }
 
     return items[0];
@@ -200,29 +196,13 @@ class Calculator {
 
   double? calculator() {
     _items.clear();
-    splitEquation();
-    if (!handle() || _items.isEmpty) return null;
+    tokenizeEquation();
+    if (!validateTokens() || _items.isEmpty) return null;
     List tempItems = List.from(_items);
     double? output = _calculate(tempItems);
     if (output == double.infinity) {
-      snackBar(context, "Result is too larg 'infinity' ∞");
-      return null;
+      throw Exception("Result is too larg 'infinity' ∞");
     }
     return output;
-  }
-
-  snackBar(BuildContext context, String text) {
-    return ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          text,
-          style: TextStyle(fontSize: 20),
-          textAlign: TextAlign.center,
-        ),
-        duration: Duration(seconds: 2),
-        backgroundColor: Color.fromARGB(255, 35, 35, 35),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
   }
 }
