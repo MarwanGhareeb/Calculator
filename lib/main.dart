@@ -1,22 +1,16 @@
 import 'package:flutter/material.dart';
-import 'home.dart';
+import 'package:flutter/services.dart';
+import 'features/calculator/presentation/screens/calculator_screen.dart';
 
 void main() {
-  runApp(MyApp());
-}
+  WidgetsFlutterBinding.ensureInitialized();
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  runApp(
+    const MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        scaffoldBackgroundColor: Colors.black,
-      ),
-      home: Home(),
-    );
-  }
+      home: CalculatorScreen(),
+    ),
+  );
 }

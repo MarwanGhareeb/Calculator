@@ -1,17 +1,17 @@
-import 'package:calculator/button.dart';
-import 'package:calculator/calculator.dart';
-import 'package:calculator/common_colors.dart';
-import 'package:calculator/equation_provider.dart';
+import 'package:calculator/features/calculator/presentation/widgets/button.dart';
+import 'package:calculator/features/calculator/domain/entities/calculator.dart';
+import 'package:calculator/core/constants.dart';
+import 'package:calculator/features/calculator/domain/services/equation_provider.dart';
 import 'package:flutter/material.dart';
 
-class Home extends StatefulWidget {
-  const Home({super.key});
+class CalculatorScreen extends StatefulWidget {
+  const CalculatorScreen({super.key});
 
   @override
-  State<Home> createState() => _HomeState();
+  State<CalculatorScreen> createState() => _CalculatorScreenState();
 }
 
-class _HomeState extends State<Home> {
+class _CalculatorScreenState extends State<CalculatorScreen> {
   final TextEditingController _equation = TextEditingController();
 
   int countFloatingPoints = 0;
@@ -64,7 +64,18 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: BLACK,
-      appBar: AppBar(backgroundColor: BLACK),
+      appBar: AppBar(
+        backgroundColor: BLACK,
+        title: Text(
+          'Calcito',
+          style: TextStyle(
+            color: BLUE,
+            fontSize: 40,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+      ),
       body: EquationProvider(
         equation: _equation,
         child: Column(
@@ -121,7 +132,7 @@ class _HomeState extends State<Home> {
                   ? ''
                   : output == output!.toInt()
                   ? output!.toInt()
-                  : output}  ",
+                  : output}   ",
               style: TextStyle(
                 color: GREEN,
                 fontSize: 27,
@@ -192,12 +203,9 @@ class _HomeState extends State<Home> {
                   onPress: buttons[index] == '='
                       ? () => setState(() {
                           try {
-                            output = Calculator(
-                              _equation.text,
-                              context,
-                            ).calculator();
+                            output = Calculator.calculator(_equation.text);
                           } catch (e) {
-                            snackBar(context, e.toString().substring(11));
+                            snackBar(context, e.toString());
                           }
                         })
                       : null,
@@ -210,7 +218,10 @@ class _HomeState extends State<Home> {
     );
   }
 
-  snackBar(BuildContext context, String text) {
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason> snackBar(
+    BuildContext context,
+    String text,
+  ) {
     return ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -219,10 +230,10 @@ class _HomeState extends State<Home> {
           textAlign: TextAlign.center,
         ),
         duration: Duration(seconds: 3),
-        backgroundColor: Color.fromARGB(255, 35, 35, 35),
+        backgroundColor: BLACK,
         behavior: SnackBarBehavior.floating,
         margin: EdgeInsets.all(40),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
       ),
     );
   }
